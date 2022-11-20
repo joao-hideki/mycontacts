@@ -1,7 +1,7 @@
 // gerador de hash/id
 const { v4 } = require('uuid');
 
-const db = require('../../database');
+const db = require('../../database/index');
 
 let contacts = [
   {
@@ -28,20 +28,15 @@ let contacts = [
 ];
 
 class ContactsRepository {
-  findAll() {
-    // resolve - dispara um sucesso; reject - dispara um erro
-    return new Promise((resolve) => {
-      resolve(contacts);
-    });
+  async findAll(orderBy = 'ASC') {
+    const order = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    const rows = await db.query(`SELECT * FROM contacts ORDER BY name ${order}`);
+    return rows;
   }
 
-  findById(id) {
-    return new Promise((resolve) => {
-      /* utiliza o resolve como se fosse o return, para conseguir capturar o retorno em uma variável
-      onde for executado
-      */
-      resolve(contacts.find(((contact) => contact.id === id)));
-    });
+  async findById(id) {
+    const [row] = await db.query('SELECT * FROM contacts WHERE id = $1', [id]);
+    return row;
   }
 
   delete(id) {
@@ -52,16 +47,14 @@ class ContactsRepository {
     });
   }
 
-  findByEmail(email) {
-    return new Promise((resolve) => {
-      resolve(contacts.find((contact) => contact.email === email));
-    });
+  async findByEmail(email) {
+    const [row] = await db.query('SELECT * FROM contacts WHERE email = $1', [email]);
+    return row;
   }
 
   async create({
     name, email, phone, category_id,
   }) {
-
     const [row] = await db.query(`
         INSERT INTO contacts(name, email, phone, category_id)
         VALUES($1, $2, $3, $4)
