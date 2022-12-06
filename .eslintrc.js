@@ -16,5 +16,6 @@ module.exports = {
     camelcase: 'off',
     'padded-blocks': 'off',
     'no-unused-vars': 'off',
+    'no-console': 'off',
   },
 };
